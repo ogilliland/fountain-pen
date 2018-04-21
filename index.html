@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Fountain Pen Study</title>
+	<style>
+		* { padding: 0; margin: 0; }
+		html { background-color: rgba(250, 250, 250, 1); }
+		#paper { display: block; margin: 0 auto; position: absolute; width: 100%; height: 100%; }
+	</style>
+	<!-- load the Paper.js library -->
+	<script type="text/javascript" src="js/paper.js"></script>
+	<!-- define paperscript -->
+	<script type="text/paperscript" canvas="paper">
+		var path;
+		var group = new Group();
+
+		var text = new PointText({
+			justification: 'left',
+			fontSize: 12,
+			content: 'click and drag to draw'
+		});
+		text.point = [10, 20];
+
+		var text = new PointText({
+			justification: 'left',
+			fontSize: 12,
+			content: 'press space to reset'
+		});
+		text.point = [10, 36];
+
+		function onMouseDown(event) {
+			path = new Path({
+				fillColor: 'black',
+				closed: true
+			});
+			path.add(event.point);
+			group.addChild(path);
+		}
+
+		function onMouseDrag(event) {
+			var step = event.delta / 10;
+			step.angle += 90;
+			step.length = Math.min(Math.max(step.length, 1), 10);
+			
+			var top = event.middlePoint + step;
+			var bottom = event.middlePoint - step;
+			
+			path.add(top);
+			path.insert(0, bottom);
+			path.smooth();
+			
+			for(var i = 0; i < Math.round(Math.random() * 2) + 1; i++) {
+				if(Math.random() > 1.15 - event.delta.length / 500) {
+					var velocity = Math.min(event.delta.length / 50, 2);
+					var offset = new Point();
+					offset.angle = event.delta.angle + Math.random() * 90 - 45;
+					offset.length = Math.random() * 60 * velocity + 30;
+					var circle = new Path.Circle(event.middlePoint + offset, Math.random() * 10 + velocity);
+					circle.fillColor = 'black';
+					group.addChild(circle);
+				}
+			}
+		}
+
+		function onMouseMove(event) {
+			for(var i = 0; i < Math.round(Math.random() * 2) + 1; i++) {
+				if(Math.random() > 1.2 - event.delta.length / 500) {
+					var velocity = Math.min(event.delta.length / 50, 2);
+					var offset = new Point();
+					offset.angle = event.delta.angle + Math.random() * 90 - 45;
+					offset.length = Math.random() * 60 * velocity + 30;
+					var circle = new Path.Circle(event.middlePoint + offset, Math.random() * 10 + velocity);
+					circle.fillColor = 'black';
+					group.addChild(circle);
+				}
+			}
+		}
+
+		function onMouseUp(event) {
+			path.add(event.point);
+			path.closed = true;
+			path.smooth();
+		}
+
+		function onKeyDown(event) {
+			if (event.key == 'space') {
+				group.removeChildren();
+			}
+		}
+	</script>
+</head>
+<body>
+	<canvas id="paper"></canvas>
+</body>
+</html>
